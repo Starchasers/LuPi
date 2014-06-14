@@ -40,8 +40,8 @@ GetTimeStamp:
 * The duration to wait is given in r0.
 * C++ Signature: void Wait(u32 delayInMicroSeconds)
 */
-.globl _wait
-_wait:
+.globl Wait
+Wait:
 	delay .req r2
 	mov delay,r0	
 	push {lr}

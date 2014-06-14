@@ -55,7 +55,7 @@ bl run
 
 mov r0,#16
 mov r1,#1
-bl _setGpioFunction
+bl SetGpioFunction
 
 /*
 * Use our new SetGpio function to set GPIO 16 to low, causing the LED to turn 
@@ -64,14 +64,14 @@ bl _setGpioFunction
 loop$:
 mov r0,#16
 mov r1,#0
-bl _setGpio
+bl SetGpio
 
 /* NEW
 * We wait using our new method. We use a value of 100000 micro seconds for the
 * delay causing the light to flash 5 times per second.
 */
 ldr r0,=100000
-bl _wait
+bl Wait
 
 /*
 * Use our new SetGpio function to set GPIO 16 to high, causing the LED to turn 
@@ -79,14 +79,14 @@ bl _wait
 */
 mov r0,#16
 mov r1,#1
-bl _setGpio
+bl SetGpio
 
 /* NEW
 * We wait using our new method. We use a value of 100000 micro seconds for the
 * delay causing the light to flash 5 times per second.
 */
 ldr r0,=100000
-bl _wait
+bl Wait
 
 /*
 * Loop over this process forevermore

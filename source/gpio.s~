@@ -35,8 +35,8 @@ GetGpioAddress:
 * low  3 bits of r1.
 * C++ Signature: void SetGpioFunction(u32 gpioRegister, u32 function)
 */
-.globl _setGpioFunction
-_setGpioFunction:
+.globl SetGpioFunction
+SetGpioFunction:
     pinNum .req r0
     pinFunc .req r1
 	cmp pinNum,#53
@@ -83,8 +83,8 @@ _setGpioFunction:
 * otherwise. 
 * C++ Signature: void SetGpio(u32 gpioRegister, u32 value)
 */
-.globl _setGpio
-_setGpio:	
+.globl SetGpio
+SetGpio:	
     pinNum .req r0
     pinVal .req r1
 
