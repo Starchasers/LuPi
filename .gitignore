@@ -1,0 +1,7 @@
+*~
+bin/
+boot/
+lua/
+kernel.img
+kernel.map
+kernel.list
