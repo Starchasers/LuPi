@@ -8,13 +8,24 @@
 
 # The toolchain to use. arm-none-eabi works, but there does exist 
 # arm-bcm2708-linux-gnueabi.
+# arm-linux-gnueabihf
 ARMGNU ?= arm-none-eabi
 
+CC = gcc
+LD = ld
+
+# LDPARAMS = -L/usr/arm-linux-gnueabihf/lib -L/usr/lib/gcc-cross/arm-linux-gnueabihf/4.8 #-lc -lg -lm -lgcc
+LDPARAMS = -L/usr/local/arm-none-eabi/lib -L/usr/local/lib/gcc/arm-none-eabi/4.3.2 -lc -lg -lm -lgcc
+CCPARAMS = -c -std=c99 -Isrc/lib/lua
+
 # The intermediate directory for compiled object files.
-BUILD = build/
+BUILD = bin/
 
 # The directory in which source files are stored.
-SOURCE = source/
+SOURCE = src/
+
+# All standard liblaries
+LIBS = $(wildcard lib/*.a)
 
 # The name of the output file to generate.
 TARGET = kernel.img
@@ -59,14 +70,14 @@ $(TARGET) : $(BUILD)output.elf
 
 # Rule to make the elf file.
 $(BUILD)output.elf : $(OBJECTS) $(LINKER)
-	$(ARMGNU)-ld --no-undefined $(OBJECTS) -Map $(MAP) -o $(BUILD)output.elf -T $(LINKER)
+	$(ARMGNU)-$(LD) --no-undefined $(OBJECTS) $(LDPARAMS) -Map $(MAP) -o $(BUILD)output.elf #-T $(LINKER)
 
 # Rule to make the object files.
 $(BUILD)%.s.o: $(SOURCE)%.s $(BUILD)
 	$(ARMGNU)-as -I $(SOURCE) $< -o $@
 	
 $(BUILD)%.c.o: $(SOURCE)%.c $(BUILD)
-	$(ARMGNU)-gcc -c -I $(SOURCE) $< -o $@
+	$(ARMGNU)-$(CC) $(CCPARAMS) -I $(SOURCE) $< -o $@
 
 $(BUILDDIRECTORIES):
 	mkdir $@
@@ -77,3 +88,4 @@ clean :
 	-rm -f $(TARGET)
 	-rm -f $(LIST)
 	-rm -f $(MAP)
+
