@@ -1,6 +1,7 @@
 ###############################################################################
 #	makefile
-#	 by Alex Chadwick
+#	 original by Alex Chadwick
+#	 modded for LuPI by Lukasz Magiera
 #
 #	A makefile script for generation of raspberry pi kernel images.
 ###############################################################################
@@ -27,13 +28,23 @@ MAP = kernel.map
 # The name of the linker script to use.
 LINKER = kernel.ld
 
+SRCDIRECTORIES = $(shell find $(SOURCE) -type d)
+BUILDDIRECTORIES = $(patsubst $(SOURCE)%, $(BUILD)%, $(SRCDIRECTORIES))
+
 # The names of all object files that must be generated. Deduced from the 
 # assembly code files in source.
-OBJECTS := 	$(patsubst $(SOURCE)%.s,$(BUILD)%.o,$(wildcard $(SOURCE)*.s))	\
-			$(patsubst $(SOURCE)%.c,$(BUILD)%.o,$(wildcard $(SOURCE)*.c))
+
+#OBJECTS := 	$(patsubst $(SOURCE)%.s,$(BUILD)%.o,$(wildcard $(SOURCE)*.s))	\
+#			$(patsubst $(SOURCE)%.c,$(BUILD)%.o,$(wildcard $(SOURCE)*.c))
+
+CFILES = $(shell find $(SOURCE) -type f -name '*.c')
+ASMFILES = $(shell find $(SOURCE) -type f -name '*.s')
+
+OBJECTS :=	$(patsubst $(SOURCE)%.c, $(BUILD)%.c.o, $(CFILES))	\
+			$(patsubst $(SOURCE)%.s, $(BUILD)%.s.o, $(ASMFILES))
 
 # Rule to make everything.
-all: $(TARGET) $(LIST)
+all: $(BUILDDIRECTORIES) $(TARGET) $(LIST)
 
 # Rule to remake everything. Does not include clean.
 rebuild: all
@@ -51,13 +62,13 @@ $(BUILD)output.elf : $(OBJECTS) $(LINKER)
 	$(ARMGNU)-ld --no-undefined $(OBJECTS) -Map $(MAP) -o $(BUILD)output.elf -T $(LINKER)
 
 # Rule to make the object files.
-$(BUILD)%.o: $(SOURCE)%.s $(BUILD)
+$(BUILD)%.s.o: $(SOURCE)%.s $(BUILD)
 	$(ARMGNU)-as -I $(SOURCE) $< -o $@
 	
-$(BUILD)%.o: $(SOURCE)%.c $(BUILD)
+$(BUILD)%.c.o: $(SOURCE)%.c $(BUILD)
 	$(ARMGNU)-gcc -c -I $(SOURCE) $< -o $@
 
-$(BUILD):
+$(BUILDDIRECTORIES):
 	mkdir $@
 
 # Rule to clean files.
