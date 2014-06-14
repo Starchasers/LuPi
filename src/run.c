@@ -2,15 +2,14 @@
 #include <string.h>
 #include <lua.h>
 #include <lauxlib.h>
+#include <stdlib.h>
 //#include <lualib.h>
 
 #include "luaFunctions.h"
 
 #include "driver/timer/systemTimer.h"
 #include "driver/gpio/gpio.h"
-#include "driver/gpu/frameBuffer.h"
-#include "driver/gpu/colors.h"
-#include "driver/gpu/drawing.h"
+#include "lib/term/gputerm.h"
 
 void waitMiliseconds(unsigned int t)
 {
@@ -19,14 +18,12 @@ void waitMiliseconds(unsigned int t)
 
 void run(void)
 {
-	FrameBuferDescription* fbd = InitialiseFrameBuffer(1024,768,16);
-	SetGraphicsAddress(fbd);
 	
-	SetForeColour(Orange);
-	DrawLine(0,0,1024,768);
 	
-	SetForeColour(GreenYellow);
-	DrawLine(0,768,1024,0);
+	gputerm_init();
+	gputerm_writeln("Hello world");
+	
+	
 
 	_setGpioFunction(1,16);
 	_setGpio(16, 1);	
@@ -36,6 +33,13 @@ void run(void)
 	mymem[1] = 1;
 	mymem[2] = 0;
 	mymem[3] = 1;
+	
+	char buf[20];
+	sprintf(buf, "0x%p", mymem);
+	
+	gputerm_writeln(buf);
+	gputerm_writeln("I still work");
+	
 	
 	for (int i = 0; i < 16; i++)
 	{
@@ -53,7 +57,7 @@ void run(void)
 	lua_setglobal(L, "setGpio");
 	_setGpio(16, 1);
 	luaL_dostring(L, "while true do setGpio(16,0)wait(750)setGpio(16,1)wait(750) end");
-	
+	gputerm_writeln("fuck..");
 	
 	
 	lua_close(L);

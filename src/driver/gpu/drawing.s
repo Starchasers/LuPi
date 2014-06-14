@@ -26,6 +26,13 @@ graphicsAddress:
 	.int 0
 
 /* NEW
+* Font stores the bitmap images for the first 128 characters.
+*/
+.align 4
+font:
+	.incbin "font.bin"
+
+/* NEW
 * SetForeColour changes the current drawing colour to the 16 bit colour in r0.
 * C++ Signature: void SetForeColour(u16 colour);
 */
@@ -162,3 +169,137 @@ DrawLine:
 	.unreq sx
 	.unreq sy
 	.unreq err
+	
+/* NEW
+* DrawCharacter renders the image for a single character given in r0 to the
+* screen, with to left corner given by (r1,r2), and returns the width of the 
+* printed character in r0, and the height in r1.
+* C++ Signature: u32x2 DrawCharacter(char character, u32 x, u32 y);
+*/
+.globl DrawCharacter
+DrawCharacter:
+	x .req r4
+	y .req r5
+	charAddr .req r6
+
+	cmp r0,#0x7F
+	movhi r0,#0
+	movhi r1,#0
+	movhi pc,lr
+
+	mov x,r1
+	mov y,r2
+
+	push {r4,r5,r6,r7,r8,lr}
+	ldr charAddr,=font
+	add charAddr, r0,lsl #4
+	
+	lineLoop$:
+		bits .req r7
+		bit .req r8
+		ldrb bits,[charAddr]		
+		mov bit,#8
+
+		charPixelLoop$:
+			subs bit,#1
+			blt charPixelLoopEnd$
+			lsl bits,#1
+			tst bits,#0x100
+			beq charPixelLoop$
+
+			add r0,x,bit
+			mov r1,y
+			bl DrawPixel
+
+			b charPixelLoop$
+		charPixelLoopEnd$:
+
+		.unreq bit
+		.unreq bits
+		add y,#1
+		add charAddr,#1
+		tst charAddr,#0b1111
+		bne lineLoop$
+
+	.unreq x
+	.unreq y
+	.unreq charAddr
+
+	width .req r0
+	height .req r1
+	mov width,#8
+	mov height,#16
+
+	pop {r4,r5,r6,r7,r8,pc}
+	.unreq width
+	.unreq height
+
+
+/* NEW
+* DrawString renders the image for a string of characters given in r0 (length
+* in r1) to the screen, with to left corner given by (r2,r3). Obeys new line
+* and horizontal tab characters.
+* C++ Signature: void DrawString(char* string, u32 length, u32 x, u32 y);
+*/
+.globl DrawString
+DrawString:
+	x .req r4
+	y .req r5
+	x0 .req r6
+	string .req r7
+	length .req r8
+	char .req r9
+	
+	push {r4,r5,r6,r7,r8,r9,lr}
+
+	mov string,r0
+	mov x,r2
+	mov x0,x
+	mov y,r3
+	mov length,r1
+
+	stringLoop$:
+		subs length,#1
+		blt stringLoopEnd$
+
+		ldrb char,[string]
+		add string,#1
+
+		mov r0,char
+		mov r1,x
+		mov r2,y
+		bl DrawCharacter
+		cwidth .req r0
+		cheight .req r1
+
+		teq char,#'\n'
+		moveq x,x0
+		addeq y,cheight
+		beq stringLoop$
+
+		teq char,#'\t'
+		addne x,cwidth
+		bne stringLoop$
+
+		add cwidth, cwidth,lsl #2
+		x1 .req r1
+		mov x1,x0
+			
+		stringLoopTab$:
+			add x1,cwidth
+			cmp x,x1
+			bge stringLoopTab$
+		mov x,x1
+		.unreq x1	
+		b stringLoop$
+	stringLoopEnd$:
+	.unreq cwidth
+	.unreq cheight
+	
+	pop {r4,r5,r6,r7,r8,r9,pc}
+	.unreq x
+	.unreq y
+	.unreq x0
+	.unreq string
+	.unreq length
+

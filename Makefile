@@ -17,6 +17,7 @@ LD = ld
 # LDPARAMS = -L/usr/arm-linux-gnueabihf/lib -L/usr/lib/gcc-cross/arm-linux-gnueabihf/4.8 #-lc -lg -lm -lgcc
 LDPARAMS = -L/usr/local/arm-none-eabi/lib -L/usr/local/lib/gcc/arm-none-eabi/4.3.2 -lc -lg -lm -lgcc
 CCPARAMS = -c -std=c99 -Isrc/lib/lua
+ASPARAMS = -Iresourcues
 
 # The intermediate directory for compiled object files.
 BUILD = bin/
@@ -57,6 +58,8 @@ OBJECTS :=	$(patsubst $(SOURCE)%.c, $(BUILD)%.c.o, $(CFILES))	\
 # Rule to make everything.
 all: $(BUILDDIRECTORIES) $(TARGET) $(LIST)
 
+build: clean all
+
 # Rule to remake everything. Does not include clean.
 rebuild: all
 
@@ -74,7 +77,7 @@ $(BUILD)output.elf : $(OBJECTS) $(LINKER)
 
 # Rule to make the object files.
 $(BUILD)%.s.o: $(SOURCE)%.s $(BUILD)
-	$(ARMGNU)-as -I $(SOURCE) $< -o $@
+	$(ARMGNU)-as $(ASPARAMS) -I $(SOURCE) $< -o $@
 	
 $(BUILD)%.c.o: $(SOURCE)%.c $(BUILD)
 	$(ARMGNU)-$(CC) $(CCPARAMS) -I $(SOURCE) $< -o $@
