@@ -10,6 +10,7 @@
 #include "driver/timer/systemTimer.h"
 #include "driver/gpio/gpio.h"
 #include "lib/term/gputerm.h"
+#include "lib/debug/dmesg.h"
 
 void waitMiliseconds(unsigned int t)
 {
@@ -19,14 +20,19 @@ void waitMiliseconds(unsigned int t)
 void run(void)
 {
 	
+	dmesg_enable_uart(9600);
+	kprint("Hello world\n");
+	kprint("Init GPU driver\n");
 	
 	gputerm_init();
 	gputerm_writeln("Hello world");
 	
+	kprint("Start LED\n");
 	
-
 	_setGpioFunction(1,16);
 	_setGpio(16, 1);	
+	
+	kprint("Try malloc\n");
 	
 	unsigned char* mymem = malloc(4);
 	mymem[0] = 0;
@@ -40,14 +46,19 @@ void run(void)
 	gputerm_writeln(buf);
 	gputerm_writeln("I still work");
 	
+	kprint("Test addr: ");
+	kprint(buf);
+	kprint("\n");
 	
 	for (int i = 0; i < 16; i++)
 	{
 		_setGpio(16, mymem[i%4]);
 		waitMiliseconds(100);
-
 	}
 	_setGpio(16, 0);
+	
+	kprint("Start LUA\n");
+	
 	lua_State *L = luaL_newstate();
 	
 	lua_pushcfunction(L, luaFn_wait);
