@@ -9,8 +9,6 @@ OUTPUTH="$2"
 OUTPUTC="$3"
 PREFIX="$4"
 
-rm -f "$OUTPUTH"
-rm -f "$OUTPUTC"
 
 
 outname="$(basename "$OUTPUTH")"
@@ -27,14 +25,15 @@ do
 filename="$(basename "$file")"
 filename="${filename%.*}"
 
-
 echo "extern char $PREFIX$filename[];"    >> "$OUTPUTH"
+
+
 echo "char $PREFIX$filename[] = {"        >> "$OUTPUTC"
-echo "    " $(xxd -i < "$file") ",0x00" >> "$OUTPUTC"
-echo "};"                               >> "$OUTPUTC"
+echo "    " $(xxd -i < "$file") ",0x00"   >> "$OUTPUTC"
+echo "};"                                 >> "$OUTPUTC"
 
 done
 
-echo "#endif"                            >> "$OUTPUTH"
+echo "#endif"                             >> "$OUTPUTH"
 
 exit 0
