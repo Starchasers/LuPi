@@ -885,26 +885,36 @@ LUA_API int lua_getctx (lua_State *L, int *ctx) {
   else return LUA_OK;
 }
 
+#include "lib/debug/dmesg.h"
 
 LUA_API void lua_callk (lua_State *L, int nargs, int nresults, int ctx,
                         lua_CFunction k) {
   StkId func;
+  //kprint("LUA:lock\n");
   lua_lock(L);
+  //kprint("LUA:achk1\n");
   api_check(L, k == NULL || !isLua(L->ci),
     "cannot use continuations inside hooks");
+    kprint("LUA:chelems\n");
   api_checknelems(L, nargs+1);
+  //kprint("LUA:achk2\n");
   api_check(L, L->status == LUA_OK, "cannot do calls on non-normal thread");
+  //kprint("LUA:chres\n");
   checkresults(L, nargs, nresults);
   func = L->top - (nargs+1);
   if (k != NULL && L->nny == 0) {  /* need to prepare continuation? */
     L->ci->u.c.k = k;  /* save continuation */
     L->ci->u.c.ctx = ctx;  /* save context */
+    //kprint("LUA:call1!\n");
     luaD_call(L, func, nresults, 1);  /* do the call */
   }
   else  /* no continuation or no yieldable */
-    luaD_call(L, func, nresults, 0);  /* just do the call */
+    {luaD_call(L, func, nresults, 0);  /* just do the call */}
+    //kprint("LUA:some adjust\n");
   adjustresults(L, nresults);
+  //kprint("LUA:unlock\n");
   lua_unlock(L);
+  //kprint("LUA:unlocked\n");
 }
 
 

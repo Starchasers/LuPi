@@ -16,5 +16,5 @@ void dmesg_enable_uart(int baud_rate)
 {
 	use_uart = 1;
 	uart_init ( baud_rate );
-	
+	uart_setTextMode(1);
 }

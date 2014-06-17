@@ -2,6 +2,7 @@
 bin/
 boot/
 lua/
+src/gen/
 kernel.img
 kernel.map
 kernel.list

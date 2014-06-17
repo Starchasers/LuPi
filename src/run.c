@@ -11,7 +11,8 @@
 #include "driver/gpio/gpio.h"
 #include "lib/term/gputerm.h"
 #include "lib/debug/dmesg.h"
-
+#include "lib/debug/selftests/malloc.h"
+#include "gen/luares.h"
 void waitMiliseconds(unsigned int t)
 {
 	_wait(t*1000);
@@ -20,56 +21,59 @@ void waitMiliseconds(unsigned int t)
 void run(void)
 {
 	
-	dmesg_enable_uart(9600);
+	dmesg_enable_uart(115200);
+	kprint("\n\n\n-----------------\n");
 	kprint("Hello world\n");
 	kprint("Init GPU driver\n");
 	
 	gputerm_init();
 	gputerm_writeln("Hello world");
 	
+	//kprint("Test printf");
+	//printf("Hello! %s\n","abcd");
+	
+	
 	kprint("Start LED\n");
 	
 	_setGpioFunction(1,16);
 	_setGpio(16, 1);	
 	
-	kprint("Try malloc\n");
+	gputerm_writeln("sdsvjslkdvnj");
 	
-	unsigned char* mymem = malloc(4);
-	mymem[0] = 0;
-	mymem[1] = 1;
-	mymem[2] = 0;
-	mymem[3] = 1;
+	//malloc_test();
 	
-	char buf[20];
-	sprintf(buf, "0x%p", mymem);
-	
-	gputerm_writeln(buf);
-	gputerm_writeln("I still work");
-	
-	kprint("Test addr: ");
-	kprint(buf);
 	kprint("\n");
 	
 	for (int i = 0; i < 16; i++)
 	{
-		_setGpio(16, mymem[i%4]);
+		_setGpio(16, i%2);
 		waitMiliseconds(100);
 	}
-	_setGpio(16, 0);
+	_setGpio(16, 1);
 	
 	kprint("Start LUA\n");
 	
 	lua_State *L = luaL_newstate();
+	kprint("Start LUA1\n");
+	//lua_pushcfunction(L, luaFn_wait);
+	//lua_setglobal(L, "wait");
+	kprint("Start LUA2\n");	
 	
-	lua_pushcfunction(L, luaFn_wait);
-	lua_setglobal(L, "wait");
+	lua_pushcfunction(L, luaFn_kprint);
+	lua_setglobal(L, "kprint");
 	
-	lua_pushcfunction(L, luaFn_setGpio);
-	lua_setglobal(L, "setGpio");
-	_setGpio(16, 1);
-	luaL_dostring(L, "while true do setGpio(16,0)wait(750)setGpio(16,1)wait(750) end");
-	gputerm_writeln("fuck..");
+	kprint("Start LUA3\n");
+	//_setGpio(16, 1);
+	//luaL_dostring(L, "");
+	//char buf[123];
+	//sprintf(buf, "A:%p, %hd, %hd, %hd\n", &linc_main_lua, (*(char*)(&linc_main_lua + 0x12)), (*(char*)(&linc_main_lua + 0x13)), (*(char*)(&linc_main_lua + 0x14)));
+	luaL_loadstring(L, lua_main);
+	//kprint("Start LUA4\n");
+	lua_call(L, 0, 0);
+
+	gputerm_writeln("fuck.. yeah\n");
 	
+	while(1){}
 	
 	lua_close(L);
 	

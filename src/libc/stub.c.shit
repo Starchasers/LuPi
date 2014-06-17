@@ -1,0 +1,40 @@
+#include "driver/gpio/gpio.h"
+#include "driver/uart/uart.h"
+#include "lib/debug/dmesg.h"
+#include "driver/timer/systemTimer.h"
+#include <sys/stat.h>
+#include <stdio.h> 
+
+void abort(void){
+	while(1)
+	{
+		_setGpio(16, 0);
+		_wait(75000);
+		_setGpio(16, 1);
+		_wait(75000);
+	}
+}
+int _fstat_r(int file, struct stat *st) 
+{
+ st->st_mode = S_IFCHR;
+ return 0;
+}
+void _open_r(void){}
+void _sbrk_r(void){}
+void _getpid_r(void){}
+void _kill_r(void){}
+int _write_r(int file, char *ptr, int len)
+{
+	char buf[40];
+	sprintf(buf, "Write(%d) %dB:",file,len);
+	kprint(buf);
+	for (int i = 0; i < len; i++)uart_putc((char)*ptr++);
+}
+void _close_r(void){}
+void _gettimeofday_r(void){}
+int _isatty_r(int file){return 1;}
+void _lseek_r(void){}
+void _read_r(void){}
+void _read(void){}
+
+

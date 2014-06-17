@@ -29,15 +29,25 @@ extern void dummy ( unsigned int );
 //alt function 0 for uart0
 
 //((250,000,000/115200)/8)-1 = 270
+
+int static textMode = 0;
+
 //------------------------------------------------------------------------
 void uart_putc ( unsigned int c )
 {
+	if(textMode && c == '\n')uart_putc('\r');
     while(1)
     {
         if(GET32(AUX_MU_LSR_REG)&0x20) break;
     }
     PUT32(AUX_MU_IO_REG,c);
 }
+
+void uart_setTextMode(int state)//It's just an ugly workaround.. but it might work
+{
+	textMode = state;
+}
+
 //------------------------------------------------------------------------
 static void hexstrings ( unsigned int d )
 {

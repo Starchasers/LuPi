@@ -14,16 +14,19 @@ ARMGNU ?= arm-none-eabi
 CC = gcc
 LD = ld
 
-# LDPARAMS = -L/usr/arm-linux-gnueabihf/lib -L/usr/lib/gcc-cross/arm-linux-gnueabihf/4.8 #-lc -lg -lm -lgcc
-LDPARAMS = -L/usr/local/arm-none-eabi/lib -L/usr/local/lib/gcc/arm-none-eabi/4.3.2 -lc -lg -lm -lgcc
-CCPARAMS = -c -std=c99 -Isrc/lib/lua
-ASPARAMS = -Iresourcues
-
+#  -march=armv6zk -mtune=arm1176jzf-s
 # The intermediate directory for compiled object files.
 BUILD = bin/
-
-# The directory in which source files are stored.
 SOURCE = src/
+LUA = resourcues/lua
+
+
+# LDPARAMS = -L/usr/arm-linux-gnueabihf/lib -L/usr/lib/gcc-cross/arm-linux-gnueabihf/4.8 #-lc -lg -lm -lgcc
+LDPARAMS = -Lbinlibs -L/usr/local/arm-none-eabi/lib -L/usr/local/lib/gcc/arm-none-eabi/4.8.4 -lnewc -lm -lgcc
+CCPARAMS = -c -std=c99 -Isrc/lib/lua
+ASPARAMS = -Iresourcues 
+LUAPARAMS = $(LUA) src/gen/luares.h src/gen/luares.c lua_
+
 
 # All standard liblaries
 LIBS = $(wildcard lib/*.a)
@@ -56,12 +59,23 @@ OBJECTS :=	$(patsubst $(SOURCE)%.c, $(BUILD)%.c.o, $(CFILES))	\
 			$(patsubst $(SOURCE)%.s, $(BUILD)%.s.o, $(ASMFILES))
 
 # Rule to make everything.
-all: $(BUILDDIRECTORIES) $(TARGET) $(LIST)
+all: smallclean $(BUILDDIRECTORIES) luaresources $(TARGET) $(LIST)
+
+smallclean:
+	find . -name '*~' -type f -exec rm {} \;
 
 build: clean all
 
 # Rule to remake everything. Does not include clean.
 rebuild: all
+
+cleanresourcues:
+	-rm -f src/gen/*
+	touch src/gen/luares.c
+	touch src/gen/luares.h
+
+luaresources: cleanresourcues
+	./txt2c $(LUAPARAMS)
 
 # Rule to make the listing file.
 $(LIST) : $(BUILD)output.elf
@@ -73,7 +87,7 @@ $(TARGET) : $(BUILD)output.elf
 
 # Rule to make the elf file.
 $(BUILD)output.elf : $(OBJECTS) $(LINKER)
-	$(ARMGNU)-$(LD) --no-undefined $(OBJECTS) $(LDPARAMS) -Map $(MAP) -o $(BUILD)output.elf #-T $(LINKER)
+	$(ARMGNU)-$(LD) --no-undefined $(OBJECTS) $(LDPARAMS) -Map $(MAP) -o $(BUILD)output.elf -T $(LINKER)
 
 # Rule to make the object files.
 $(BUILD)%.s.o: $(SOURCE)%.s $(BUILD)
@@ -86,9 +100,10 @@ $(BUILDDIRECTORIES):
 	mkdir $@
 
 # Rule to clean files.
-clean : 
+clean : cleanresourcues
 	-rm -rf $(BUILD)
 	-rm -f $(TARGET)
 	-rm -f $(LIST)
 	-rm -f $(MAP)
+	
 
