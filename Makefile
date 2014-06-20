@@ -71,6 +71,7 @@ rebuild: all
 
 cleanresourcues:
 	-rm -f src/gen/*
+	mkdir src/gen/
 	touch src/gen/luares.c
 	touch src/gen/luares.h
 
