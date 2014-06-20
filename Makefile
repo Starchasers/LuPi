@@ -22,8 +22,8 @@ LUA = resourcues/lua
 
 
 # LDPARAMS = -L/usr/arm-linux-gnueabihf/lib -L/usr/lib/gcc-cross/arm-linux-gnueabihf/4.8 #-lc -lg -lm -lgcc
-LDPARAMS = -Lbinlibs -L/usr/local/arm-none-eabi/lib -L/usr/local/lib/gcc/arm-none-eabi/4.8.4 -lnewc -lm -lgcc
-CCPARAMS = -c -std=c99 -Isrc/lib/lua
+LDPARAMS = -Lbinlibs -L/usr/local/arm-none-eabi/lib -L/usr/local/lib/gcc/arm-none-eabi/4.8.4 -lnewc -lcsud -lm -lgcc
+CCPARAMS = -c -std=c99 -Isrc/lib/lua -Iinclude -mcpu=arm1176jzf-s
 ASPARAMS = -Iresourcues 
 LUAPARAMS = $(LUA) src/gen/luares.h src/gen/luares.c lua_
 

@@ -13,6 +13,12 @@
 #include "lib/debug/dmesg.h"
 #include "lib/debug/selftests/malloc.h"
 #include "gen/luares.h"
+#include "usbd/usbd.h"
+
+#include "driver/uart/uart.h"
+#include "driver/keyboard/keyboard.h"
+
+
 void waitMiliseconds(unsigned int t)
 {
 	_wait(t*1000);
@@ -23,15 +29,16 @@ void run(void)
 	
 	dmesg_enable_uart(115200);
 	kprint("\n\n\n-----------------\n");
-	kprint("Hello world\n");
+	kprint("Booting LuPI\n");
+	
+	kprint("Init USB driver\n");
+	
+	UsbInitialise();
+	
 	kprint("Init GPU driver\n");
 	
 	gputerm_init();
-	gputerm_writeln("Hello world");
-	
-	//kprint("Test printf");
-	//printf("Hello! %s\n","abcd");
-	
+	gputerm_writeln("Hello world");	
 	
 	kprint("Start LED\n");
 	
@@ -50,6 +57,15 @@ void run(void)
 		waitMiliseconds(100);
 	}
 	_setGpio(16, 1);
+	
+	kprint("Keyboard test loop\nQ to quit\n");
+	
+	while(1)
+	{
+		KeyboardUpdate();
+		char c = KeyboardGetChar();
+		uart_putc(c);
+	}
 	
 	kprint("Start LUA\n");
 	

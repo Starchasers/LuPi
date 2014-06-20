@@ -12,14 +12,26 @@ SECTIONS {
 	* Next we put the rest of the code.
 	*/
 	.text : {
-		*(.text)
+		*(.text*)
+	}
+	
+	.bss : {
+		*(.bss*)
+	}
+
+	COMMON : {
+		*(COMMON*)
 	}
 
 	/* 
 	* Next we put the data.
 	*/
 	.data : {
-		*(.data)
+		*(.data*)
+	}
+
+	.rodata : {
+		*(.rodata*)
 	}
 
 	/*

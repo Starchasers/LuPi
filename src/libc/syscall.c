@@ -15,7 +15,7 @@
 
 int errno;
 
-unsigned int heap_end=0x0080000;
+unsigned int heap_end=0x00800000;
 unsigned int prev_heap_end;
 
 int
